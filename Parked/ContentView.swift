@@ -13,6 +13,36 @@ struct ContentView: View {
     @State private var showingSaveParking = false
     @State private var showingFoundCarConfirmation = false
 
+    private let pageBackground = Color(
+        red: 0.965,
+        green: 0.957,
+        blue: 0.933
+    )
+
+    private let ink = Color(
+        red: 0.08,
+        green: 0.12,
+        blue: 0.14
+    )
+
+    private let parkedGreen = Color(
+        red: 0.10,
+        green: 0.42,
+        blue: 0.31
+    )
+
+    private let softGreen = Color(
+        red: 0.89,
+        green: 0.94,
+        blue: 0.90
+    )
+
+    private let warmOrange = Color(
+        red: 0.86,
+        green: 0.48,
+        blue: 0.18
+    )
+
     private var activeParkingSpot: ParkingSpot? {
         parkingSpots.first { $0.isActive }
     }
@@ -20,7 +50,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground)
+                pageBackground
                     .ignoresSafeArea()
 
                 if let parkingSpot = activeParkingSpot {
@@ -29,17 +59,35 @@ struct ContentView: View {
                     emptyParkingView
                 }
             }
-            .navigationTitle("Parked")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "car.fill")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(parkedGreen)
+
+                        Text("Parked")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(ink)
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
                         ParkingHistoryView()
                     } label: {
                         Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(ink)
+                            .frame(width: 38, height: 38)
+                            .background(Color.white.opacity(0.72))
+                            .clipShape(Circle())
                     }
                     .accessibilityLabel("Parking History")
                 }
             }
+            .toolbarBackground(pageBackground, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .sheet(isPresented: $showingSaveParking) {
                 SaveParkingView { expirationDate, note, photoData in
                     saveParkingSpot(
@@ -68,60 +116,84 @@ struct ContentView: View {
                 NotificationManager.shared.requestPermission()
             }
         }
+        .tint(parkedGreen)
     }
 
     // MARK: - Empty State
 
     private var emptyParkingView: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
-            ZStack {
-                Circle()
-                    .fill(.blue.opacity(0.12))
-                    .frame(width: 140, height: 140)
+            VStack(alignment: .leading, spacing: 24) {
+                ZStack {
+                    RoundedRectangle(
+                        cornerRadius: 24,
+                        style: .continuous
+                    )
+                    .fill(ink)
+                    .frame(width: 88, height: 88)
 
-                Circle()
-                    .fill(.blue.opacity(0.08))
-                    .frame(width: 105, height: 105)
+                    Image(systemName: "car.fill")
+                        .font(.system(size: 34, weight: .medium))
+                        .foregroundStyle(pageBackground)
+                }
 
-                Image(systemName: "car.fill")
-                    .font(.system(size: 52))
-                    .foregroundStyle(.blue)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Never forget where you parked.")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(ink)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(
+                        "Save your car's location, remember the details, and find your way back when you're ready."
+                    )
+                    .font(.system(size: 17))
+                    .foregroundStyle(ink.opacity(0.62))
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
             }
-
-            VStack(spacing: 10) {
-                Text("Where did you park?")
-                    .font(.title)
-                    .fontWeight(.bold)
-
-                Text(
-                    "Save your car's location, set a parking reminder, and find your way back when you're ready."
-                )
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
-            }
-            .padding(.top, 28)
 
             Spacer()
 
             Button {
                 prepareToSaveParking()
             } label: {
-                Label(
-                    "Save My Parking Spot",
-                    systemImage: "location.fill"
+                HStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Park Here")
+                            .font(.system(size: 17, weight: .semibold))
+
+                        Text("Save my current location")
+                            .font(.system(size: 13))
+                            .opacity(0.76)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 16, weight: .semibold))
+                        .frame(width: 42, height: 42)
+                        .background(Color.white.opacity(0.14))
+                        .clipShape(Circle())
+                }
+                .foregroundStyle(.white)
+                .padding(.leading, 20)
+                .padding(.trailing, 12)
+                .padding(.vertical, 12)
+                .background(parkedGreen)
+                .clipShape(
+                    RoundedRectangle(
+                        cornerRadius: 22,
+                        style: .continuous
+                    )
                 )
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.plain)
         }
-        .padding(20)
+        .padding(.horizontal, 22)
+        .padding(.bottom, 22)
     }
 
     // MARK: - Active Parking
@@ -129,158 +201,242 @@ struct ContentView: View {
     private func activeParkingView(
         _ parkingSpot: ParkingSpot
     ) -> some View {
-
         let coordinate = CLLocationCoordinate2D(
             latitude: parkingSpot.latitude,
             longitude: parkingSpot.longitude
         )
 
         return ScrollView {
-            VStack(spacing: 18) {
+            VStack(alignment: .leading, spacing: 20) {
 
-                // Status
+                // MARK: Hero
 
-                HStack(spacing: 12) {
-                    ZStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 7) {
                         Circle()
-                            .fill(.green.opacity(0.14))
-                            .frame(width: 44, height: 44)
+                            .fill(parkedGreen)
+                            .frame(width: 8, height: 8)
 
-                        Image(systemName: "checkmark")
-                            .fontWeight(.bold)
-                            .foregroundStyle(.green)
+                        Text("Car is parked")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(parkedGreen)
                     }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Car location saved")
-                            .font(.headline)
+                    Text("Your car is parked.")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundStyle(ink)
 
-                        Text("We'll remember where you parked.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-                }
-                .padding(16)
-                .background(.background)
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: 20,
-                        style: .continuous
+                    Text(
+                        "Saved at \(parkingSpot.parkedAt.formatted(date: .omitted, time: .shortened))"
                     )
-                )
+                    .font(.system(size: 15))
+                    .foregroundStyle(ink.opacity(0.58))
+                }
+                .padding(.top, 8)
 
-                // Map
+                // MARK: Map
 
-                Map(
-                    initialPosition: .region(
-                        MKCoordinateRegion(
-                            center: coordinate,
-                            span: MKCoordinateSpan(
-                                latitudeDelta: 0.005,
-                                longitudeDelta: 0.005
+                ZStack(alignment: .topLeading) {
+                    Map(
+                        initialPosition: .region(
+                            MKCoordinateRegion(
+                                center: coordinate,
+                                span: MKCoordinateSpan(
+                                    latitudeDelta: 0.005,
+                                    longitudeDelta: 0.005
+                                )
                             )
                         )
+                    ) {
+                        Marker(
+                            "My Car",
+                            systemImage: "car.fill",
+                            coordinate: coordinate
+                        )
+                        .tint(parkedGreen)
+                    }
+                    .frame(height: 300)
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 26,
+                            style: .continuous
+                        )
                     )
-                ) {
-                    Marker(
-                        "My Car",
-                        systemImage: "car.fill",
-                        coordinate: coordinate
-                    )
-                }
-                .frame(height: 280)
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: 22,
-                        style: .continuous
-                    )
-                )
-                .overlay {
-                    RoundedRectangle(
-                        cornerRadius: 22,
-                        style: .continuous
-                    )
-                    .stroke(
-                        Color.primary.opacity(0.06),
-                        lineWidth: 1
-                    )
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "car.fill")
+                            .font(.system(size: 11, weight: .semibold))
+
+                        Text("Your car")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(ink.opacity(0.88))
+                    .clipShape(Capsule())
+                    .padding(14)
                 }
 
-                // Parking information
+                // MARK: Parking Time
 
-                VStack(spacing: 0) {
-                    informationRow(
-                        icon: "clock.fill",
-                        title: "Parked",
+                if let expirationDate = parkingSpot.expirationDate {
+                    parkingTimerCard(expirationDate)
+                }
+
+                // MARK: Details
+
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        Text("Spot details")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(ink)
+
+                        Spacer()
+
+                        Button {
+                            prepareToSaveParking()
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 12))
+
+                                Text("Edit")
+                                    .font(.system(size: 14, weight: .medium))
+                            }
+                            .foregroundStyle(parkedGreen)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    detailItem(
+                        icon: "clock",
+                        label: "Parked",
                         value: parkingSpot.parkedAt.formatted(
                             date: .abbreviated,
                             time: .shortened
                         )
                     )
 
-                    if let expirationDate = parkingSpot.expirationDate {
-                        Divider()
-                            .padding(.leading, 52)
-
-                        informationRow(
-                            icon: "timer",
-                            title: "Parking expires",
-                            value: expirationDate.formatted(
-                                date: .omitted,
-                                time: .shortened
-                            ),
-                            iconColor: .orange
-                        )
-                    }
-
                     if !parkingSpot.note.isEmpty {
                         Divider()
-                            .padding(.leading, 52)
+                            .overlay(ink.opacity(0.08))
 
-                        informationRow(
-                            icon: "mappin.and.ellipse",
-                            title: "Parking details",
+                        detailItem(
+                            icon: "mappin",
+                            label: "Parking note",
                             value: parkingSpot.note
                         )
                     }
                 }
-                .background(.background)
+                .padding(20)
+                .background(Color.white.opacity(0.78))
                 .clipShape(
                     RoundedRectangle(
-                        cornerRadius: 20,
+                        cornerRadius: 24,
                         style: .continuous
                     )
                 )
+                .overlay {
+                    RoundedRectangle(
+                        cornerRadius: 24,
+                        style: .continuous
+                    )
+                    .stroke(ink.opacity(0.06), lineWidth: 1)
+                }
 
-                // Photo
+                // MARK: Photo
 
                 if let imageData = parkingSpot.photoData,
                    let uiImage = UIImage(data: imageData) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "photo")
+                                .foregroundStyle(parkedGreen)
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label(
-                            "Parking Photo",
-                            systemImage: "photo.fill"
-                        )
-                        .font(.headline)
+                            Text("Parking photo")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(ink)
+                        }
 
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFill()
                             .frame(maxWidth: .infinity)
-                            .frame(height: 210)
+                            .frame(height: 220)
                             .clipped()
                             .clipShape(
                                 RoundedRectangle(
-                                    cornerRadius: 16,
+                                    cornerRadius: 18,
                                     style: .continuous
                                 )
                             )
                     }
-                    .padding(16)
-                    .background(.background)
+                    .padding(18)
+                    .background(Color.white.opacity(0.78))
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 24,
+                            style: .continuous
+                        )
+                    )
+                }
+
+                // MARK: Directions
+
+                Button {
+                    openDirections(to: parkingSpot)
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "figure.walk")
+                            .font(.system(size: 18, weight: .semibold))
+                            .frame(width: 42, height: 42)
+                            .background(Color.white.opacity(0.12))
+                            .clipShape(Circle())
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Directions to My Car")
+                                .font(.system(size: 17, weight: .semibold))
+
+                            Text("Open walking directions")
+                                .font(.system(size: 13))
+                                .opacity(0.7)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(12)
+                    .padding(.trailing, 6)
+                    .background(ink)
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 22,
+                            style: .continuous
+                        )
+                    )
+                }
+                .buttonStyle(.plain)
+
+                // MARK: Found Car
+
+                Button {
+                    showingFoundCarConfirmation = true
+                } label: {
+                    HStack(spacing: 9) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16))
+
+                        Text("I'm Back at My Car")
+                            .font(.system(size: 15, weight: .medium))
+                    }
+                    .foregroundStyle(parkedGreen)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(softGreen.opacity(0.75))
                     .clipShape(
                         RoundedRectangle(
                             cornerRadius: 20,
@@ -288,82 +444,142 @@ struct ContentView: View {
                         )
                     )
                 }
+                .buttonStyle(.plain)
 
-                // Main action
-
-                Button {
-                    openDirections(to: parkingSpot)
-                } label: {
-                    Label(
-                        "Directions to My Car",
-                        systemImage: "figure.walk"
-                    )
-                    .font(.headline)
+                Text("Parked")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(ink.opacity(0.28))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                    .padding(.top, 2)
+                    .padding(.bottom, 10)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Timer Card
+
+    private func parkingTimerCard(
+        _ expirationDate: Date
+    ) -> some View {
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            let remaining = expirationDate.timeIntervalSince(context.date)
+            let isExpired = remaining <= 0
+
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(
+                        isExpired
+                        ? "Parking expired"
+                        : "Time remaining"
+                    )
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(
+                        isExpired
+                        ? Color.red.opacity(0.8)
+                        : warmOrange
+                    )
+
+                    Text(
+                        isExpired
+                        ? "Expired"
+                        : remainingTimeString(remaining)
+                    )
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(ink)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
 
-                // Secondary actions
+                Spacer()
 
-                HStack(spacing: 12) {
-                    Button {
-                        prepareToSaveParking()
-                    } label: {
-                        Label(
-                            "Update",
-                            systemImage: "pencil"
+                VStack(alignment: .trailing, spacing: 6) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(
+                            isExpired
+                            ? .red
+                            : warmOrange
                         )
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
 
-                    Button {
-                        showingFoundCarConfirmation = true
-                    } label: {
-                        Label(
-                            "Found Car",
-                            systemImage: "checkmark.circle"
+                    Text(
+                        expirationDate.formatted(
+                            date: .omitted,
+                            time: .shortened
                         )
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
+                    )
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(ink.opacity(0.6))
                 }
             }
-            .padding(20)
+            .padding(22)
+            .background(
+                isExpired
+                ? Color.red.opacity(0.07)
+                : Color(
+                    red: 0.98,
+                    green: 0.92,
+                    blue: 0.82
+                )
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 24,
+                    style: .continuous
+                )
+            )
         }
     }
 
-    // MARK: - Information Row
+    // MARK: - Detail Item
 
-    private func informationRow(
+    private func detailItem(
         icon: String,
-        title: String,
-        value: String,
-        iconColor: Color = .blue
+        label: String,
+        value: String
     ) -> some View {
-        HStack(spacing: 14) {
+        HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 17))
-                .foregroundStyle(iconColor)
-                .frame(width: 24)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(parkedGreen)
+                .frame(width: 36, height: 36)
+                .background(softGreen)
+                .clipShape(
+                    RoundedRectangle(
+                        cornerRadius: 11,
+                        style: .continuous
+                    )
+                )
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                    .font(.system(size: 13))
+                    .foregroundStyle(ink.opacity(0.5))
 
                 Text(value)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(ink)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
         }
-        .padding(16)
+    }
+
+    // MARK: - Timer Formatting
+
+    private func remainingTimeString(
+        _ interval: TimeInterval
+    ) -> String {
+        let totalMinutes = max(Int(interval / 60), 0)
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+
+        if hours > 0 {
+            return "\(hours) hr \(minutes) min"
+        } else {
+            return "\(minutes) min"
+        }
     }
 
     // MARK: - Directions

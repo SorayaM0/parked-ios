@@ -13,76 +13,110 @@ struct SaveParkingView: View {
 
     var onSave: (Date?, String, Data?) -> Void
 
+    private let pageBackground = Color(
+        red: 0.965,
+        green: 0.957,
+        blue: 0.933
+    )
+
+    private let ink = Color(
+        red: 0.08,
+        green: 0.12,
+        blue: 0.14
+    )
+
+    private let parkedGreen = Color(
+        red: 0.10,
+        green: 0.42,
+        blue: 0.31
+    )
+
+    private let softGreen = Color(
+        red: 0.89,
+        green: 0.94,
+        blue: 0.90
+    )
+
+    private let warmOrange = Color(
+        red: 0.86,
+        green: 0.48,
+        blue: 0.18
+    )
+
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground)
+                pageBackground
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 18) {
-
-                        headerCard
-
+                    VStack(alignment: .leading, spacing: 20) {
+                        introSection
                         timerCard
-
                         detailsCard
-
                         photoCard
-
                         saveButton
                     }
-                    .padding(20)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 28)
                 }
+                .scrollIndicators(.hidden)
             }
-            .navigationTitle("Save Parking")
+            .navigationTitle("New parking spot")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(pageBackground, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .fontWeight(.medium)
+                    .foregroundStyle(ink.opacity(0.7))
                 }
             }
+            .tint(parkedGreen)
             .onChange(of: selectedPhoto) { _, newPhoto in
                 loadPhoto(newPhoto)
             }
         }
     }
 
-    // MARK: - Header
+    // MARK: - Intro
 
-    private var headerCard: some View {
-        HStack(spacing: 14) {
+    private var introSection: some View {
+        HStack(alignment: .center, spacing: 16) {
             ZStack {
-                Circle()
-                    .fill(.blue.opacity(0.12))
-                    .frame(width: 50, height: 50)
+                RoundedRectangle(
+                    cornerRadius: 18,
+                    style: .continuous
+                )
+                .fill(ink)
+                .frame(width: 58, height: 58)
 
                 Image(systemName: "car.fill")
-                    .foregroundStyle(.blue)
-                    .font(.title3)
+                    .font(.system(size: 23, weight: .medium))
+                    .foregroundStyle(pageBackground)
             }
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Save your parking spot")
-                    .font(.headline)
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Remember this spot")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(ink)
 
-                Text("Add any details that will help you find your car later.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    "Add anything that will make your car easier to find later."
+                )
+                .font(.system(size: 14))
+                .foregroundStyle(ink.opacity(0.58))
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
         }
-        .padding(16)
-        .background(.background)
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: 20,
-                style: .continuous
-            )
-        )
+        .padding(.vertical, 6)
     }
 
     // MARK: - Timer
@@ -91,107 +125,182 @@ struct SaveParkingView: View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
                 Image(systemName: "timer")
-                    .foregroundStyle(.orange)
-                    .frame(width: 24)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(warmOrange)
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Color(
+                            red: 0.98,
+                            green: 0.92,
+                            blue: 0.82
+                        )
+                    )
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 12,
+                            style: .continuous
+                        )
+                    )
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Parking Timer")
-                        .font(.headline)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Parking timer")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(ink)
 
-                    Text("Get reminded before your parking expires.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text("Remind me before my parking expires")
+                        .font(.system(size: 13))
+                        .foregroundStyle(ink.opacity(0.52))
                 }
 
                 Spacer()
 
                 Toggle("", isOn: $hasTimeLimit)
                     .labelsHidden()
+                    .tint(parkedGreen)
             }
-            .padding(16)
+            .padding(18)
 
             if hasTimeLimit {
                 Divider()
-                    .padding(.leading, 54)
+                    .overlay(ink.opacity(0.08))
+                    .padding(.horizontal, 18)
 
-                HStack {
-                    Text("Expires")
-                        .font(.subheadline)
-
-                    Spacer()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Parking expires")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(ink.opacity(0.55))
 
                     DatePicker(
-                        "",
+                        "Expiration",
                         selection: $expirationDate,
                         in: Date()...,
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .labelsHidden()
+                    .datePickerStyle(.compact)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(16)
+                .padding(18)
             }
         }
-        .background(.background)
+        .background(Color.white.opacity(0.78))
         .clipShape(
             RoundedRectangle(
-                cornerRadius: 20,
+                cornerRadius: 24,
                 style: .continuous
             )
         )
+        .overlay {
+            RoundedRectangle(
+                cornerRadius: 24,
+                style: .continuous
+            )
+            .stroke(ink.opacity(0.05), lineWidth: 1)
+        }
     }
 
     // MARK: - Details
 
     private var detailsCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(
-                "Parking Details",
-                systemImage: "mappin.and.ellipse"
-            )
-            .font(.headline)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                Image(systemName: "mappin.and.ellipse")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(parkedGreen)
+                    .frame(width: 36, height: 36)
+                    .background(softGreen)
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 11,
+                            style: .continuous
+                        )
+                    )
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Spot details")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(ink)
+
+                    Text("Optional")
+                        .font(.system(size: 12))
+                        .foregroundStyle(ink.opacity(0.45))
+                }
+            }
 
             TextField(
-                "Level 3, Spot 214, near elevator...",
+                "Level, row, spot number, nearby landmark...",
                 text: $note,
                 axis: .vertical
             )
-            .lineLimit(2...4)
-            .padding(12)
-            .background(
-                Color(.secondarySystemGroupedBackground)
-            )
+            .font(.system(size: 15))
+            .lineLimit(3...5)
+            .padding(14)
+            .background(pageBackground.opacity(0.75))
             .clipShape(
                 RoundedRectangle(
-                    cornerRadius: 12,
+                    cornerRadius: 16,
                     style: .continuous
                 )
             )
+            .overlay {
+                RoundedRectangle(
+                    cornerRadius: 16,
+                    style: .continuous
+                )
+                .stroke(ink.opacity(0.06), lineWidth: 1)
+            }
         }
-        .padding(16)
-        .background(.background)
+        .padding(18)
+        .background(Color.white.opacity(0.78))
         .clipShape(
             RoundedRectangle(
-                cornerRadius: 20,
+                cornerRadius: 24,
                 style: .continuous
             )
         )
+        .overlay {
+            RoundedRectangle(
+                cornerRadius: 24,
+                style: .continuous
+            )
+            .stroke(ink.opacity(0.05), lineWidth: 1)
+        }
     }
 
     // MARK: - Photo
 
     private var photoCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(
-                "Parking Photo",
-                systemImage: "camera.fill"
-            )
-            .font(.headline)
+            HStack(spacing: 10) {
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(parkedGreen)
+                    .frame(width: 36, height: 36)
+                    .background(softGreen)
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 11,
+                            style: .continuous
+                        )
+                    )
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Parking photo")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(ink)
+
+                    Text("Optional")
+                        .font(.system(size: 12))
+                        .foregroundStyle(ink.opacity(0.45))
+                }
+            }
 
             Text(
-                "Save a photo of your level, spot number, or a nearby landmark."
+                "Take a visual reminder of your level, spot number, or a nearby landmark."
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .font(.system(size: 14))
+            .foregroundStyle(ink.opacity(0.58))
+            .lineSpacing(2)
 
             if let imageData = photoData,
                let uiImage = UIImage(data: imageData) {
@@ -200,39 +309,59 @@ struct SaveParkingView: View {
                     .resizable()
                     .scaledToFill()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 190)
+                    .frame(height: 200)
                     .clipped()
                     .clipShape(
                         RoundedRectangle(
-                            cornerRadius: 14,
+                            cornerRadius: 18,
                             style: .continuous
                         )
                     )
 
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     PhotosPicker(
                         selection: $selectedPhoto,
                         matching: .images
                     ) {
-                        Label(
-                            "Change",
-                            systemImage: "photo"
-                        )
+                        HStack(spacing: 7) {
+                            Image(systemName: "photo")
+                            Text("Change")
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(ink)
                         .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(pageBackground)
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: 14,
+                                style: .continuous
+                            )
+                        )
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
 
                     Button(role: .destructive) {
                         selectedPhoto = nil
                         photoData = nil
                     } label: {
-                        Label(
-                            "Remove",
-                            systemImage: "trash"
-                        )
+                        HStack(spacing: 7) {
+                            Image(systemName: "trash")
+                            Text("Remove")
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.red)
                         .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.red.opacity(0.07))
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: 14,
+                                style: .continuous
+                            )
+                        )
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.plain)
                 }
 
             } else {
@@ -240,37 +369,57 @@ struct SaveParkingView: View {
                     selection: $selectedPhoto,
                     matching: .images
                 ) {
-                    VStack(spacing: 10) {
+                    HStack(spacing: 14) {
                         Image(systemName: "photo.badge.plus")
-                            .font(.title2)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundStyle(parkedGreen)
+                            .frame(width: 44, height: 44)
+                            .background(softGreen)
+                            .clipShape(Circle())
 
-                        Text("Add Parking Photo")
-                            .fontWeight(.medium)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Add a photo")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(ink)
+
+                            Text("Choose from your photo library")
+                                .font(.system(size: 12))
+                                .foregroundStyle(ink.opacity(0.5))
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(ink.opacity(0.35))
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 110)
+                    .padding(14)
+                    .background(pageBackground.opacity(0.75))
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 17,
+                            style: .continuous
+                        )
+                    )
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(.blue)
-                .background(
-                    Color.blue.opacity(0.07)
-                )
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: 14,
-                        style: .continuous
-                    )
-                )
             }
         }
-        .padding(16)
-        .background(.background)
+        .padding(18)
+        .background(Color.white.opacity(0.78))
         .clipShape(
             RoundedRectangle(
-                cornerRadius: 20,
+                cornerRadius: 24,
                 style: .continuous
             )
         )
+        .overlay {
+            RoundedRectangle(
+                cornerRadius: 24,
+                style: .continuous
+            )
+            .stroke(ink.opacity(0.05), lineWidth: 1)
+        }
     }
 
     // MARK: - Save
@@ -285,17 +434,31 @@ struct SaveParkingView: View {
 
             dismiss()
         } label: {
-            Label(
-                "Save Parking Spot",
-                systemImage: "car.fill"
+            HStack(spacing: 12) {
+                Image(systemName: "car.fill")
+                    .font(.system(size: 15, weight: .semibold))
+
+                Text("Save Parking Spot")
+                    .font(.system(size: 17, weight: .semibold))
+
+                Spacer()
+
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 17)
+            .background(parkedGreen)
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 22,
+                    style: .continuous
+                )
             )
-            .font(.headline)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 6)
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .padding(.top, 4)
+        .buttonStyle(.plain)
+        .padding(.top, 2)
     }
 
     // MARK: - Photo Loading

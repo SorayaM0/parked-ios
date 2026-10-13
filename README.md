@@ -1,4 +1,4 @@
-# Parked 🚗
+# Parked 
 
 Parked is a native iOS app I built to solve a simple problem: forgetting where you parked.
 

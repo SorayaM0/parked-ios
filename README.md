@@ -1,20 +1,23 @@
-# Parked 
+
+**Parked**
 
 Parked is a native iOS app I built to solve a simple problem: forgetting where you parked.
 
 The app saves your car's location, keeps track of parking details and meter expiration, and gives you walking directions back when you're ready to leave. I wanted the project to feel like something I could actually use, while also giving me a chance to work with native iOS features like location services, maps, notifications, local persistence, and photos.
 
-## Screenshots
+**Screenshots**
 
-| Home | Save Parking |
-| --- | --- |
-| <img src="screenshots/home.png" width="300"> | <img src="screenshots/save-parking.png" width="300"> |
+<p align="center">
+  <img src="screenshots/home.png" width="300" alt="Home">
+  <img src="screenshots/save-parking.png" width="300" alt="Save Parking">
+</p>
 
-| Active Parking | Parking History |
-| --- | --- |
-| <img src="screenshots/active-parking.png" width="300"> | <img src="screenshots/parking-history.png" width="300"> |
+<p align="center">
+  <img src="screenshots/active-parking.png" width="300" alt="Active Parking">
+  <img src="screenshots/parking-history.png" width="300" alt="Parking History">
+</p>
 
-## What it does
+**What it does**
 
 When you park, Parked can save your current location along with a few details that might help you find the car later.
 
@@ -32,7 +35,7 @@ You can:
 
 Parking sessions are stored locally, so your active spot and parking history are still there after closing and reopening the app.
 
-## Built with
+**Built with**
 
 - Swift
 - SwiftUI
@@ -42,7 +45,7 @@ Parking sessions are stored locally, so your active spot and parking history are
 - UserNotifications
 - PhotosUI
 
-## How it works
+**How it works**
 
 The main data model is a `ParkingSpot`, which stores the coordinates of the car along with the parking time, optional expiration time, note, photo, and whether the session is still active.
 
@@ -52,7 +55,7 @@ If the user adds an expiration time, the app keeps track of the remaining time a
 
 Once the user returns to the car, the session is marked as complete instead of being deleted. That lets it appear in Parking History with information like the parking time, return time, duration, note, and expiration time.
 
-## A few things I learned
+**A few things I learned**
 
 This was my first project focused specifically on building a complete native iOS experience.
 
@@ -60,7 +63,7 @@ One of the more interesting parts was connecting several Apple frameworks togeth
 
 I also spent time refining the UI instead of leaving the app with mostly default SwiftUI styling. I wanted Parked to have its own visual identity while still feeling natural on iOS.
 
-## Running locally
+**Running locally**
 
 You'll need Xcode and either an iOS Simulator or a physical iPhone.
 
@@ -76,12 +79,10 @@ The first time you use the app, iOS will ask for location and notification permi
 
 > **Simulator note:** Core Location can sometimes fail to return a simulated location. For debug builds running in the iOS Simulator, the project includes a test-location fallback so the parking flow can still be tested. Physical devices use Core Location normally.
 
-## What's next
+**What's next**
 
 There are a few directions I could take Parked in the future, such as improving location error handling, adding richer parking-session editing, and testing more of the experience on physical devices.
 
 For now, the goal was to build a focused iOS app around one everyday problem and take the full workflow from an idea to a working product.
-
----
 
 Built by **Soraya Mosavi**, Computer Science student at Rutgers University.
